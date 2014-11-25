@@ -41,6 +41,7 @@ now_ms() ->
 get(#fixstt{id=Val}, id) -> Val;
 get(#fixstt{lat=Val}, lat) -> Val;
 get(#fixstt{lng=Val}, lng) -> Val;
+get(#fixstt{len=Val}, len) -> Val;
 get(#fixstt{date=Val}, date) -> Val;
 get(#fixstt{ref=Val}, ref) -> Val;
 get(#fixstt{type=Val}, type) -> Val;
@@ -49,6 +50,7 @@ get(#fixstt{msg=Val}, msg) -> Val.
 set(Entry, id, Val) -> Entry#fixstt{id=Val};
 set(Entry, lat, Val) -> Entry#fixstt{lat=Val};
 set(Entry, lng, Val) -> Entry#fixstt{lng=Val};
+set(Entry, len, Val) -> Entry#fixstt{len=Val};
 set(Entry, date, Val) -> Entry#fixstt{date=Val};
 set(Entry, ref, Val) -> Entry#fixstt{ref=Val};
 set(Entry, type, Val) -> Entry#fixstt{type=Val};
