@@ -1,5 +1,5 @@
 -module(fixsttio).
--export([open/1, open/2, append/2, read/3, close/1]).
+-export([open/1, open/2, append/2, read/3, close/1, iterate/3]).
 
 -include("fixstt.hrl").
 -include("private/fixsttio.hrl").
@@ -48,6 +48,11 @@ close(Io=#fixsttio{handle=Handle}) ->
         ok -> {ok, Io#fixsttio{handle=nil}};
         Other -> Other
     end.
+
+% not called fold since the return value to control continue/stop is different
+iterate(Io, Fun, Acc0) ->
+    {ok, Io1} = seek(Io, bof),
+    do_iterate(Io1, Fun, Acc0).
 
 %% Private API
 
@@ -128,3 +133,16 @@ seek_to_id(Io=#fixsttio{head_id=HeadId, record_size=RecordSize}, Id) ->
     IdOffsetFromHead = Id - HeadId,
     BytesOffsetFromHead = IdOffsetFromHead * RecordSize,
     seek(Io, {bof, BytesOffsetFromHead}).
+
+do_iterate(Io, Fun, Acc0) ->
+    case read_next(Io) of
+        {ok, Io1, Entry} ->
+            case Fun(Entry, Acc0) of
+                {continue, Acc1} -> do_iterate(Io1, Fun, Acc1);
+                {stop, Acc1} -> {ok, Acc1};
+                {error, Reason} -> {error, Reason}
+            end;
+        eof -> {ok, Acc0};
+        Other -> Other
+    end.
+

@@ -9,7 +9,8 @@
 all() -> [binary_rountrip, initial_state_is_correct, can_write_one, can_write_two,
          write_1_read_first, write_1_read_many,
          error_opening_200byte_file, error_opening_700byte_file,
-         open_existing_file_1_entry, open_existing_file_2_entries].
+         open_existing_file_1_entry, open_existing_file_2_entries,
+         iterate_empty, iterate_1, iterate_2, iterate_2_stop_first].
 
 init_per_testcase(TestName, Config) ->
     FileName = atom_to_list(TestName),
@@ -139,3 +140,40 @@ write_1_read_first(Config) ->
 
 write_1_read_many(Config) ->
     write_1_read_n(Config, 10).
+
+iterate_empty(Config) ->
+    Io = ?config(fixsttio, Config),
+    {ok, 42} = fixsttio:iterate(Io, fun (Entry, 42) ->
+                                            Entry = notreachable
+                                    end, 42).
+
+iterate_1(Config) ->
+    Io = ?config(fixsttio, Config),
+    R = sample_status(),
+    {ok, Io1, Id1} = fixsttio:append(Io, R),
+    RId = fixstt:set(fixstt:set(R, id, Id1), len, 11),
+    {ok, RId} = fixsttio:iterate(Io1, fun (Entry, _Accum) ->
+                                             {continue, Entry}
+                                    end, []).
+
+iterate_2(Config) ->
+    Io = ?config(fixsttio, Config),
+    R = sample_status(),
+    {ok, Io1, Id1} = fixsttio:append(Io, R),
+    {ok, Io2, Id2} = fixsttio:append(Io1, R),
+    R1Id = fixstt:set(fixstt:set(R, id, Id1), len, 11),
+    R2Id = fixstt:set(fixstt:set(R, id, Id2), len, 11),
+    {ok, [R2Id, R1Id]} = fixsttio:iterate(Io2, fun (Entry, Accum) ->
+                                             {continue, [Entry|Accum]}
+                                    end, []).
+
+iterate_2_stop_first(Config) ->
+    Io = ?config(fixsttio, Config),
+    R = sample_status(),
+    {ok, Io1, Id1} = fixsttio:append(Io, R),
+    {ok, Io2, _Id2} = fixsttio:append(Io1, R),
+    R1Id = fixstt:set(fixstt:set(R, id, Id1), len, 11),
+    {ok, R1Id} = fixsttio:iterate(Io2, fun (Entry, 42) ->
+                                             {stop, Entry}
+                                    end, 42).
+
