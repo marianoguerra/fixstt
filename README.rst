@@ -20,7 +20,9 @@ a fixstt entry contains the following fields:
 * type: 16 bit integer, can be used to define the msg type, payload content type etc
 * msg: zero padded payload to fill the total msg size (default 512 bytes)
 
-this means the header is 44 bytes long, in erlang syntax:: 
+in erlang syntax:
+
+.. code:: erlang
 
     <<Id:64/big-unsigned-integer,
     Lat:64/big-float,
