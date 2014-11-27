@@ -4,6 +4,14 @@
 -include("fixstt.hrl").
 -include("private/fixsttio.hrl").
 
+% if nil is passed return Count from the tail
+read(Io=#fixsttio{head_id=HeadId, tail_id=TailId}, nil, Count) ->
+    FirstId = TailId - Count,
+    FinalFirstId = if FirstId < HeadId -> HeadId;
+                      true -> FirstId
+                   end,
+    read(Io, FinalFirstId, Count);
+
 read(Io=#fixsttio{head_id=HeadId, tail_id=TailId}, FirstId, Count) ->
     if FirstId < HeadId orelse FirstId > TailId -> {error, outofbound};
        true ->

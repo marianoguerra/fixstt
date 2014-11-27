@@ -7,7 +7,7 @@
 -include_lib("common_test/include/ct.hrl").
 
 all() -> [binary_rountrip, initial_state_is_correct, can_write_one, can_write_two,
-         write_1_read_first, write_1_read_many,
+         write_1_read_first, write_1_read_many, write_2_read_last_n,
          error_opening_200byte_file, error_opening_700byte_file,
          open_existing_file_1_entry, open_existing_file_2_entries,
          iterate_empty, iterate_1, iterate_2, iterate_2_stop_first].
@@ -140,6 +140,15 @@ write_1_read_first(Config) ->
 
 write_1_read_many(Config) ->
     write_1_read_n(Config, 10).
+
+write_2_read_last_n(Config) ->
+    Io = ?config(fixsttio, Config),
+    {ok, Io1, 1} = write_1(Io),
+    {ok, Io2, 2} = write_1(Io1),
+    {ok, Io3, [R1, R2]} = fixsttio:read(Io2, nil, 2),
+    1 = R1#fixstt.id,
+    2 = R2#fixstt.id,
+    {ok, _Io4, [R1, R2]} = fixsttio:read(Io3, nil, 20).
 
 iterate_empty(Config) ->
     Io = ?config(fixsttio, Config),
