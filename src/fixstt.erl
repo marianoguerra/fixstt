@@ -1,6 +1,6 @@
 -module(fixstt).
 -export([to_binary/1, to_binary/2, from_binary/1, now_ms/0, format/1, get/2,
-         set/3, new/1, new/3]).
+         set/3, new/1, new/3, to_proplist/1]).
 
 -include("fixstt.hrl").
 
@@ -33,6 +33,10 @@ from_binary(<<Id:64/big-unsigned-integer,
 format(#fixstt{id=Id, lat=Lat, lng=Lng, date=Date, len=Len, ref=Ref, type=Type, msg=Msg}) ->
     io_lib:format("#fixstt{id=~p, lat=~p, lng=~p, date=~p, len=~p, ref=~p, type=~p, msg=~p}",
                   [Id, Lat, Lng, Date, Len, Ref, Type, Msg]).
+
+to_proplist(#fixstt{id=Id, lat=Lat, lng=Lng, date=Date, ref=Ref, type=Type, msg=Msg}) ->
+    [{id, Id}, {lat, Lat}, {lng, Lng}, {date, Date}, {ref, Ref}, {type, Type},
+     {msg, Msg}].
 
 now_ms() ->
     {Mega, Sec, Micro} = os:timestamp(),
